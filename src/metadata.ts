@@ -25,6 +25,16 @@ export function hashMessage(message: AgentMessage): string {
 	if ("content" in message) {
 		if (typeof message.content === "string") {
 			content = message.content;
+		} else if (message.role === "toolResult") {
+			content = message.content
+				.map((part: any) => {
+					if (part.text === "text") {
+						return part.text || "";
+					} else {
+						return `[image:${part.mimeType || "unknown"}]`;
+					}
+				})
+				.join("");
 		} else if (Array.isArray(message.content)) {
 			content = message.content
 				.map((part: any) => {
@@ -34,7 +44,6 @@ export function hashMessage(message: AgentMessage): string {
 					if (part.type === "text") return part.text || "";
 					if (part.type === "image") return `[image:${part.source?.type || "unknown"}]`;
 					if (part.type === "tool_use") return `[tool:${part.name || "unknown"}]`;
-					if (part.type === "tool_result") return `[result:${part.tool_use_id || "unknown"}]`;
 					return "";
 				})
 				.join("");
@@ -114,19 +123,16 @@ export function isSameOperation(msg1: AgentMessage, msg2: AgentMessage): boolean
 export function extractToolUseIds(message: AgentMessage): string[] {
 	const ids: string[] = [];
 	
-	if ("content" in message && Array.isArray(message.content)) {
-		for (const part of message.content) {
-			if (part && typeof part === 'object') {
-				if (part.type === "tool_use" && part.id) {
-					ids.push(part.id);
-				}
-				if (part.type === "tool_result" && part.tool_use_id) {
-					ids.push(part.tool_use_id);
-				}
+	if (message.role === "toolResult") {
+		ids.push(message.toolCallId);
+	} else if (  message.role === "assistant" ) {
+		for (const ctn of message.content) {
+			if (ctn.type === "toolCall") {
+				ids.push(ctn.id);
 			}
 		}
 	}
-	
+
 	return ids;
 }
 

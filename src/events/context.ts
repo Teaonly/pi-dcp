@@ -6,8 +6,7 @@
  */
 
 import type { ContextEvent, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import type { DcpConfigWithPruneRuleObjects } from "../types";
-import type { StatsTracker } from "../cmds/stats.ts";
+import type { DcpConfigWithPruneRuleObjects, StatsTracker } from "../types";
 import { applyPruningWorkflow } from "../workflow";
 
 export interface ContextEventHandlerOptions {

@@ -10,6 +10,6 @@
     "noImplicitAny": true,
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
-    "types": ["bun", "node"]
+    "types": ["node"]
   }
 }

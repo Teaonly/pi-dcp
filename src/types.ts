@@ -37,8 +37,10 @@ export interface MessageMetadata {
 	shouldPrune?: boolean;
 	/** Reason for pruning (for debugging) */
 	pruneReason?: string;
-	/** Extensible: custom rule metadata */
-	[key: string]: any;
+	/** ToolResult and ToolCall */
+	hasToolUse?: boolean;
+	toolUseIds?: string[];
+	hasToolResult?: boolean;
 }
 
 /**
@@ -93,22 +95,16 @@ export const isPruneRuleObject = (obj: unknown): obj is PruneRule => {
 /**
  * Extension configuration
  */
-export interface DcpConfig {
+export interface DcpConfigWithPruneRuleObjects {
 	/** Master enable/disable toggle */
 	enabled?: boolean;
 	/** Enable debug logging */
 	debug?: boolean;
 	/** Always keep last N messages */
 	keepRecentCount: number;
-	/** Optional log directory override */
-	logDir?: string;
-}
-export type DcpConfigWithPruneRuleObjects = DcpConfig & {
+	/**  */
 	rules: PruneRule[];
-};
-export type DcpConfigWithRuleRefs = DcpConfig & {
-	rules: (string | PruneRule)[];
-};
+}
 
 export type CommandDefinition = Parameters<ExtensionAPI['registerCommand']>[1];
 

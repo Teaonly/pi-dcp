@@ -14,19 +14,11 @@
   "author": "",
   "license": "MIT",
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": "*",
-    "@mariozechner/pi-agent-core": "*"
+    "@mariozechner/pi-agent-core": "0.60.0",
+    "@mariozechner/pi-coding-agent": "0.60.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.0.0"
-  },
-  "pi": {
-    "extensions": [
-      "./index.ts"
-    ]
-  },
-  "dependencies": {
-    "bunfig": "^0.15.6"
   }
 }

@@ -80,7 +80,6 @@ function cascadePruneForward(msg: MessageWithMetadata, ctx: ProcessContext): voi
 				// tool_use is kept, protect tool_result
 				nextMsg.metadata.shouldPrune = false;
 				nextMsg.metadata.pruneReason = undefined;
-				nextMsg.metadata.protectedByToolPairing = true;
 
 				if (ctx.config.debug) {
 					console.log(
@@ -118,7 +117,6 @@ function protectToolUseBackward(msg: MessageWithMetadata, ctx: ProcessContext): 
 			// Protect the tool_use
 			prevMsg.metadata.shouldPrune = false;
 			prevMsg.metadata.pruneReason = undefined;
-			prevMsg.metadata.protectedByToolPairing = true;
 
 			if (ctx.config.debug) {
 				console.log(
@@ -153,7 +151,6 @@ function protectMatchingToolResults(toolUseMsg: MessageWithMetadata, toolUseInde
 		if (hasMatchingToolResult && nextMsg.metadata.shouldPrune) {
 			nextMsg.metadata.shouldPrune = false;
 			nextMsg.metadata.pruneReason = undefined;
-			nextMsg.metadata.protectedByToolPairing = true;
 
 			if (ctx.config.debug) {
 				console.log(
