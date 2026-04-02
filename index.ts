@@ -16,8 +16,7 @@
  * - Filter phase: Remove pruned messages
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { createContextEventHandler } from "./src/events/context";
+import type { ExtensionAPI,ContextEvent,ExtensionContext } from "@mariozechner/pi-coding-agent";
 
 // Register all built-in rules on import
 import { registerRule } from "./src/registry";
@@ -27,6 +26,7 @@ import { errorPurgingRule } from "./src/rules/error-purging";
 import { toolPairingRule } from "./src/rules/tool-pairing";
 import { recencyRule } from "./src/rules/recency";
 import { DcpConfigWithPruneRuleObjects, StatsTracker } from "./src/types";
+import { applyPruningWorkflow } from "./src/workflow";
 
 const DEFAULT_CONFIG: DcpConfigWithPruneRuleObjects = {
 	enabled: true,
@@ -36,6 +36,50 @@ const DEFAULT_CONFIG: DcpConfigWithPruneRuleObjects = {
 };
 for (const rule of DEFAULT_CONFIG.rules) {
 	registerRule(rule);
+}
+
+interface ContextEventHandlerOptions {
+	config: DcpConfigWithPruneRuleObjects;
+	statsTracker: StatsTracker;
+}
+
+/**
+ * Creates a context event handler that applies pruning to messages.
+ * 
+ * @param options - Configuration and stats tracker
+ * @returns Event handler function
+ */
+export function createContextEventHandler(options: ContextEventHandlerOptions) {
+	const { config, statsTracker } = options;
+
+	return async (event: ContextEvent, ctx: ExtensionContext) => {
+		try {
+			const originalCount = event.messages.length;
+
+			// Apply pruning workflow
+			const prunedMessages = applyPruningWorkflow(event.messages, config);
+
+			const prunedCount = originalCount - prunedMessages.length;
+			statsTracker.totalPruned += prunedCount;
+			statsTracker.totalProcessed += originalCount;
+
+			if (prunedCount > 0) {
+				// Show toast notification when pruning occurs
+				// ctx. //(`DCP: Pruned ${prunedCount}/${originalCount} messages`, "info");
+			}
+
+			if (config.debug) {
+				ctx.ui.notify(`[pi-dcp] Pruned ${prunedCount} / ${originalCount} messages`);
+			}
+
+			return { messages: prunedMessages };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			ctx.ui.notify(`[pi-dcp] Error in pruning workflow: ${errorMessage}`, "error");
+			// Fail-safe: return original messages on error
+			return { messages: event.messages };
+		}
+	};
 }
 
 export default async function (pi: ExtensionAPI) {
