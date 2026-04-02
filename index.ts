@@ -18,7 +18,6 @@
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { createContextEventHandler } from "./src/events/context";
-import { createSessionStartEventHandler } from "./src/events/sessionStart";
 
 // Register all built-in rules on import
 import { registerRule } from "./src/registry";
@@ -53,6 +52,5 @@ export default async function (pi: ExtensionAPI) {
 
 	// Hook into context event (before each LLM call)
 	pi.on("context", createContextEventHandler({ config, statsTracker }));
-	pi.on("session_start", createSessionStartEventHandler({ config }));
 }
 
